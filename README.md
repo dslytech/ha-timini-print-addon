@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="timini_print_server/logo.png" alt="TiMini Print Server logo" width="180">
+</p>
+
 # TiMini Print Server — Home Assistant Add-on
 
 Runs [TiMini-Print](https://github.com/Dejniel/TiMini-Print)'s own
