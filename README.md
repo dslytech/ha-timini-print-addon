@@ -197,3 +197,5 @@ by NaitLee, and the [MaddoScientisto fork](https://github.com/MaddoScientisto/Ca
 of it with native Android support, which is where this whole project
 started before TiMini-Print turned out to be the more reliable option
 for this specific printer model.
+
+* Developed with the assistance of Anthropic Claude.
