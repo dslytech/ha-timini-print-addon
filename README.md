@@ -122,6 +122,19 @@ the native 1-5 `--darkness` setting controls the *printer's own
 thermal intensity* for whatever gets sent, and applies to text prints
 too. You can adjust both independently for image prints.
 
+## Forcing an unrecognized printer's model
+
+Some printers show up in a scan but aren't automatically recognized as
+a specific known model (TiMini-Print's own GUI shows these tagged
+"[manual model required]"). Both the "Print text" and "Print
+image/PDF" cards have a **"Force model"** field for this - enter the
+model key (as shown in TiMini-Print's own `--list-models` output, or
+its GUI's "Treat as model" dropdown, e.g. `a33`) to pass
+`--printer-model <key>` to the CLI, which can let printing succeed
+even when the automatic profile match doesn't work. Leave it blank
+for normal automatic detection (the default, and what most printers
+need).
+
 ## Troubleshooting
 
 - **`BrokenPipeError` in the add-on log, or "Could not reach the
