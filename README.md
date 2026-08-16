@@ -44,6 +44,8 @@ hardware above, it turned out to be the more reliable option - see
 
 [![Open your Home Assistant instance and show the add-on store.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fdslytech%2Fha-timini-print-addon)
 
+Settings → Apps → + Install apps (bottom right) → "..." (top right) → Repositories → + Add (bottom right) → Paste repository URL
+
 ## HTTP API
 
 - `GET /scan` → runs `timiniprint_command_line.py --scan`, returns
