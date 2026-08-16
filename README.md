@@ -2,6 +2,8 @@
   <img src="timini_print_server/logo.png" alt="TiMini Print Server logo" width="180">
 </p>
 
+[![Open your Home Assistant instance and show the add-on store.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fdslytech%2Fha-timini-print-addon)
+
 # TiMini Print Server — Home Assistant Add-on
 
 Runs [TiMini-Print](https://github.com/Dejniel/TiMini-Print)'s own
