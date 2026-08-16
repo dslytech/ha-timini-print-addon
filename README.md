@@ -2,8 +2,6 @@
   <img src="timini_print_server/logo.png" alt="TiMini Print Server logo" width="180">
 </p>
 
-[![Open your Home Assistant instance and show the add-on store.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fdslytech%2Fha-timini-print-addon)
-
 # TiMini Print Server — Home Assistant Add-on
 
 Runs [TiMini-Print](https://github.com/Dejniel/TiMini-Print)'s own
@@ -42,36 +40,9 @@ apps as closely as possible, down to the packet level." On the
 hardware above, it turned out to be the more reliable option - see
 "Tested hardware" above for exactly what's been confirmed.
 
-## Installation (local add-on)
+## Installation
 
-Same process as the Cat Printer Server add-on:
-
-1. Enable **Advanced Mode** on your Home Assistant user profile.
-2. Copy this whole `timini_print_server` folder to
-   `/addons/local/timini_print_server/` on the Home Assistant host
-   (via the Samba share or SSH add-on).
-3. Settings → Add-ons → Add-on Store → "⋮" menu → **Check for updates**.
-   "TiMini Print Server" should appear under **Local add-ons**.
-4. Install (this triggers the Docker build - watch the log).
-5. Configure:
-   - `ble_adapter`: the adapter you want everything pinned to. Defaults
-     to `hci0` (the Pi's built-in Bluetooth), which works fine on its
-     own once the other fixes in this add-on (UTF-8 locale, DejaVu
-     font, pairing agent) are in place. If you have a dedicated USB BLE
-     dongle and prefer to use that instead (e.g. `hci1`), set this to
-     its name - the add-on will power off every other detected adapter
-     at startup so only your chosen one stays active, since
-     TiMini-Print's CLI has no per-call adapter flag of its own.
-   - `printer_name`: optional. If you know your printer's Bluetooth
-     name (e.g. `TD-11308`), set it here so prints don't need to
-     specify `--bluetooth` each time. Leave blank to auto-use the
-     first supported printer found, same as TiMini-Print's own default
-     CLI behaviour.
-6. Start the add-on, check the log for `TiMini Print wrapper listening
-   on 0.0.0.0:8096`.
-7. Open `http://<your-pi-ip>:8096/` in a browser - there's a minimal
-   test page to trigger a scan or a text print by hand, before wiring
-   up any Home Assistant automation.
+[![Open your Home Assistant instance and show the add-on store.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fdslytech%2Fha-timini-print-addon)
 
 ## HTTP API
 
