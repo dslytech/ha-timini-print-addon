@@ -198,6 +198,22 @@ whether the model field is shown.
 
 - **Build fails cloning TiMini-Print or installing requirements**:
   confirms your Pi4 has internet access during the add-on install step.
+- **Scan finds nothing, even for a device you can confirm is
+  advertising (e.g. visible in your phone's own Bluetooth settings)**:
+  if Home Assistant's own built-in "Bluetooth" integration is enabled,
+  it actively holds/monitors the same physical adapter this add-on
+  uses, which can make TiMini-Print's own `--scan` come back empty due
+  to contention over the adapter - this add-on's own web UI has no
+  workaround for that (it's a separate process from Home Assistant
+  Core, with no way to read HA's own Bluetooth data). If you're also
+  using the companion **HACS integration**, its Lovelace card has a
+  second button - "Use Home Assistant's Bluetooth list" - that reads
+  whatever Home Assistant's own Bluetooth integration has already
+  (passively) discovered, without triggering a new scan at all, so it
+  sidesteps this contention entirely. Pick a device from there (any
+  Bluetooth device works, not just recognized printers - tick
+  "Unsupported / unrecognized device" to force a model), even if this
+  add-on's own web UI scan stays empty.
 - **Scan finds nothing / print fails**: this add-on doesn't change
   TiMini-Print's own connection logic at all - troubleshoot it the same
   way you would running it directly over SSH (`cd /opt/timini-print &&
