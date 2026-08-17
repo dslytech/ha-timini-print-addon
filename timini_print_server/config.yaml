@@ -1,0 +1,22 @@
+name: "TiMini Print Server"
+version: "2.4.1"
+slug: "timini_print_server"
+description: "Runs Dejniel/TiMini-Print's command-line client inside Home Assistant OS, wrapped in a tiny HTTP server, so you can scan/print to Bluetooth thermal 'cat' printers (incl. TD-11308 / Pocket Printer clones) that Cat-Printer's own bleak-based client struggles to connect to reliably."
+url: "https://github.com/dslytech/ha-timini-print-addon"
+arch:
+  - aarch64
+  - armv7
+  - amd64
+init: false
+startup: services
+boot: auto
+host_dbus: true
+host_network: true
+full_access: true
+options:
+  ble_adapter: "hci0"
+  printer_name: ""
+schema:
+  ble_adapter: "str"
+  printer_name: "str"
+map: []
