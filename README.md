@@ -50,20 +50,24 @@ Settings → Apps → + Install apps (bottom right) → "..." (top right) → Re
 
 - `GET /scan` → runs `timiniprint_command_line.py --scan`, returns
   `{"returncode", "stdout", "stderr"}` as JSON.
+- `GET /list-models` → runs `timiniprint_command_line.py
+  --list-models`, returns `{"models": [{"key", "label"}, ...], "raw":
+  {"returncode", "stdout", "stderr"}}` as JSON.
 - `POST /print` with JSON body `{"text": "...", "printer": "optional
-  name override", "text_columns": 20, "darkness": 3}` → runs
-  `timiniprint_command_line.py --text "..."` with `--text-columns`
-  and/or `--darkness` appended when given (both optional - omit either
-  to use TiMini-Print's own native defaults). Returns
-  `{"returncode", "stdout", "stderr"}` as JSON; HTTP 200 on success
-  (CLI exit code 0), 500 otherwise.
+  name override", "text_columns": 20, "darkness": 3, "printer_model":
+  "a33"}` → runs `timiniprint_command_line.py --text "..."` with
+  `--text-columns`, `--darkness`, and/or `--printer-model` appended
+  when given (all optional - omit any to use TiMini-Print's own native
+  defaults). Returns `{"returncode", "stdout", "stderr"}` as JSON;
+  HTTP 200 on success (CLI exit code 0), 500 otherwise.
 - `POST /print_image` with JSON body `{"image_b64": "...", "filename":
-  "photo.jpg", "printer": "optional name override", "darkness": 3}` →
-  base64-decodes the image/PDF, saves it to a temp file (deleted
-  afterwards), and runs `timiniprint_command_line.py <tempfile>` (with
-  `--bluetooth <printer>` and/or `--darkness` if given). Supported
-  extensions (from `filename`): `.png` `.jpg` `.jpeg` `.gif` `.bmp`
-  `.pdf`. Same response shape as `/print`.
+  "photo.jpg", "printer": "optional name override", "darkness": 3,
+  "printer_model": "a33"}` → base64-decodes the image/PDF, saves it to
+  a temp file (deleted afterwards), and runs
+  `timiniprint_command_line.py <tempfile>` (with `--bluetooth
+  <printer>`, `--darkness`, and/or `--printer-model` if given).
+  Supported extensions (from `filename`): `.png` `.jpg` `.jpeg` `.gif`
+  `.bmp` `.pdf`. Same response shape as `/print`.
 
 ## Text size and print darkness: native controls, not a workaround
 
@@ -126,17 +130,30 @@ too. You can adjust both independently for image prints.
 
 Some printers show up in a scan but aren't automatically recognized as
 a specific known model (TiMini-Print's own GUI shows these tagged
-"[manual model required]"). Both the "Print text" and "Print
-image/PDF" cards have a **"Force model"** field for this - enter the
-model key (as shown in TiMini-Print's own `--list-models` output, or
-its GUI's "Treat as model" dropdown, e.g. `a33`) to pass
-`--printer-model <key>` to the CLI, which can let printing succeed
-even when the automatic profile match doesn't work. Leave it blank
-for normal automatic detection (the default, and what most printers
-need).
+"[manual model required]"). The **Scan** card has an **"Unsupported /
+unrecognized device"** checkbox for this - checking it reveals a model
+field with autocomplete, backed by a new `/list-models` endpoint
+(wrapping `timiniprint_command_line.py --list-models`) so you can
+search/pick the exact model key (e.g. `a33`) instead of guessing it.
+This printer + model selection is shared by both the "Print text" and
+"Print image/PDF" cards below, so you only need to set it once. It
+passes `--printer-model <key>` to the CLI, which can let printing
+succeed even when the automatic profile match doesn't work. Leave the
+checkbox unticked for normal automatic detection (the default, and
+what most printers need) - note the printer picker itself already
+always shows every discovered device regardless of this checkbox
+(TiMini-Print's own `--scan` doesn't filter), so this only affects
+whether the model field is shown.
 
 ## Troubleshooting
 
+- **`BrokenPipeError` traceback specifically around `/list-models`**:
+  fixed as of add-on version 2.4.1. The `/list-models` call can be a
+  little slower than others (144 known models to enumerate) - if the
+  browser gave up waiting (e.g. a page refresh mid-request), the
+  server would previously log a full Python traceback when it tried
+  to respond anyway. 2.4.1 catches this specific case quietly - it's
+  benign either way, nothing was actually broken.
 - **`BrokenPipeError` in the add-on log, or "Could not reach the
   add-on ... timed out" in Home Assistant, especially after clicking
   Scan/Print more than once in quick succession**: fixed as of add-on
