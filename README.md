@@ -214,15 +214,28 @@ whether the model field is shown.
   Bluetooth device works, not just recognized printers - tick
   "Unsupported / unrecognized device" to force a model), even if this
   add-on's own web UI scan stays empty.
-- **Scan finds nothing / print fails**: this add-on doesn't change
-  TiMini-Print's own connection logic at all - troubleshoot it the same
-  way you would running it directly over SSH (`cd /opt/timini-print &&
-  python3 timiniprint_command_line.py --scan`), since the wrapper is
-  just shelling out to exactly that.
-- Compare results against the separate Cat Printer Server add-on's
-  experience with the same physical printer and dongle - if one
-  connects reliably and the other doesn't, that's useful signal about
-  which underlying BLE approach actually suits your hardware.
+  The full request path in that case, for reference (this describes
+  how it's designed to work end-to-end - the individual pieces have
+  been tested, but not this exact combination all the way through
+  repeatedly, so treat it as likely-correct rather than confirmed):
+  the card puts the address you picked from HA's Bluetooth list into
+  the printer field → pressing Print sends `printer: "<address>"` to
+  the `timini_print.print_text`/`print_image` service → the HACS
+  integration forwards that to this add-on over HTTP → the add-on
+  appends `--bluetooth <address>` to the CLI call → the add-on then
+  connects to that address itself, over its own Bluetooth adapter -
+  entirely separately from however Home Assistant found that address
+  in the first place. So while HA's Bluetooth list solves the
+  *discovery* side of the adapter-contention problem, the actual
+  *connection* still goes through this add-on's own Bluetooth stack,
+  which may or may not be affected by the same contention - report
+  back if you find it isn't reliable.
+- **Scan finds nothing / print fails, and you're not using the HACS
+  integration (or HA's own Bluetooth list didn't help either)**: this
+  add-on doesn't change TiMini-Print's own connection logic at all -
+  troubleshoot it the same way you would running it directly over SSH
+  (`cd /opt/timini-print && python3 timiniprint_command_line.py
+  --scan`), since the wrapper is just shelling out to exactly that.
 
 ## Credits
 
