@@ -53,21 +53,37 @@ Settings → Apps → + Install apps (bottom right) → "..." (top right) → Re
 - `GET /list-models` → runs `timiniprint_command_line.py
   --list-models`, returns `{"models": [{"key", "label"}, ...], "raw":
   {"returncode", "stdout", "stderr"}}` as JSON.
+- `GET /licenses` → runs `timiniprint_command_line.py --licenses`,
+  returns `{"returncode", "stdout", "stderr"}` as JSON.
 - `POST /print` with JSON body `{"text": "...", "printer": "optional
   name override", "text_columns": 20, "darkness": 3, "printer_model":
-  "a33"}` → runs `timiniprint_command_line.py --text "..."` with
-  `--text-columns`, `--darkness`, and/or `--printer-model` appended
-  when given (all optional - omit any to use TiMini-Print's own native
-  defaults). Returns `{"returncode", "stdout", "stderr"}` as JSON;
-  HTTP 200 on success (CLI exit code 0), 500 otherwise.
+  "a33", "hard_wrap": false, "copies": 1}` → runs `timiniprint_command_line.py
+  --text "..."` with `--text-columns`, `--darkness`,
+  `--printer-model`, and/or `--text-hard-wrap` (if `hard_wrap` is
+  true) appended when given (all optional - omit any to use
+  TiMini-Print's own native defaults). Returns `{"returncode",
+  "stdout", "stderr"}` as JSON; HTTP 200 on success (CLI exit code 0),
+  500 otherwise.
 - `POST /print_image` with JSON body `{"image_b64": "...", "filename":
   "photo.jpg", "printer": "optional name override", "darkness": 3,
-  "printer_model": "a33"}` → base64-decodes the image/PDF, saves it to
-  a temp file (deleted afterwards), and runs
-  `timiniprint_command_line.py <tempfile>` (with `--bluetooth
-  <printer>`, `--darkness`, and/or `--printer-model` if given).
-  Supported extensions (from `filename`): `.png` `.jpg` `.jpeg` `.gif`
-  `.bmp` `.pdf`. Same response shape as `/print`.
+  "printer_model": "a33", "pdf_pages": "1,3-5", "page_gap": 5,
+  "trim_side_margins": true, "trim_top_bottom_margins": true, "copies": 1}` →
+  base64-decodes the image/PDF, saves it to a temp file (deleted
+  afterwards), and runs `timiniprint_command_line.py <tempfile>` (with
+  `--bluetooth <printer>`, `--darkness`, `--printer-model`,
+  `--pdf-pages`, `--page-gap`, and/or `--no-trim-side-margins`/
+  `--no-trim-top-bottom-margins` if `trim_side_margins`/
+  `trim_top_bottom_margins` are `false` - both default to `true`,
+  matching TiMini-Print's own default of trimming). Supported
+  extensions (from `filename`): `.png` `.jpg` `.jpeg` `.gif` `.bmp`
+  `.pdf`. Same response shape as `/print`.
+- `POST /paper_motion` with JSON body `{"action": "feed", "printer":
+  "optional name override", "printer_model": "a33"}` → runs
+  `timiniprint_command_line.py --feed` (or `--retract` if `action` is
+  `"retract"`) with `--bluetooth`/`--printer-model` appended when
+  given. `action` is required and must be `"feed"` or `"retract"` -
+  matches the "Feed"/"Retract" buttons in TiMini-Print's own GUI.
+  Same response shape as `/print`.
 
 ## Text size and print darkness: native controls, not a workaround
 
@@ -96,13 +112,54 @@ into TiMini-Print's actual CLI source (`app/cli.py`,
 This add-on now shells out to those flags directly, with no Pillow
 rendering, no image cropping tricks, and no canvas/DPI guessing
 involved - it's exactly what the official Android app does under the
-hood. Two settings mentioned in the Android app's UI - **rotate
-print** and **paper feed amount** - exist in TiMini-Print's internal
-`PrintSettings` dataclass but are **not** wired up to any CLI flag in
-the version of the source seen so far, so they can't be exposed here
-either; "number of copies" wasn't found anywhere in the CLI or
-settings code at all. If a future TiMini-Print release adds CLI flags
-for these, they can be added here too.
+hood. One setting mentioned in the Android app's UI - **rotate
+print** - exists in TiMini-Print's internal `PrintSettings` dataclass
+but is **not** wired up to any CLI flag in the version of the source
+seen so far, so it can't be exposed here either; "number of copies"
+wasn't found anywhere in the CLI or settings code at all (see "Copies,
+and viewing TiMini-Print's own license text" below for how that's
+worked around client-side instead). **Paper feed amount**, however,
+*is* available in a different form: `--feed` and `--retract` (see
+"Feed and retract paper" below) advance/retract the paper directly as
+a standalone action - this isn't the same as the per-job "feed
+padding" setting shown in the Android app (which still isn't
+exposed), but covers the same practical need of moving the paper
+without printing anything. If a future TiMini-Print release adds CLI
+flags for rotation, they can be added here too.
+
+## Feed and retract paper
+
+The **Scan** card has **"Feed paper"** / **"Retract paper"** buttons
+that run `timiniprint_command_line.py --feed` / `--retract` - these
+just move the paper, no printing involved, matching the same-named
+buttons in TiMini-Print's own GUI. Uses the printer/model selection
+from the Scan card above (same as a print job would).
+
+## Copies, and viewing TiMini-Print's own license text
+
+Both print cards have a **Copies** field (1-20) - TiMini-Print's own
+CLI has no `--copies` flag, so this just calls it that many times in
+a row; if any copy fails, later ones are skipped rather than wasting
+more paper. The small **"i"** button next to the page title (like the
+info button on many real printers/appliances) fetches and shows
+TiMini-Print's own license text (`--licenses` output) via a new
+`GET /licenses` endpoint.
+
+## PDF page selection, page gap, and margin trimming
+
+The "Print image or PDF" card also has:
+
+- **PDF pages** (e.g. `1,3-5`) - print only specific pages of a
+  multi-page PDF instead of all of them. Ignored for plain images.
+- **Gap between pages** (mm) - extra vertical spacing between PDF
+  pages. Leave blank for TiMini-Print's own default (5mm).
+- **Trim white side margins** / **Trim white top/bottom margins** -
+  on by default (matching TiMini-Print's own default behavior).
+  Untick either to print the image/PDF page at its original size
+  without TiMini-Print's automatic white-margin cropping - see "Text
+  size and print darkness" above for why this crop can matter (it's
+  the same mechanism that made an early font-size approach for text
+  printing behave unpredictably).
 
 ## Black & white preview with dithering and brightness adjustment
 
